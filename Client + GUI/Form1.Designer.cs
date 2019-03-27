@@ -83,7 +83,7 @@
             // підключенняToolStripMenuItem
             // 
             this.підключенняToolStripMenuItem.Name = "підключенняToolStripMenuItem";
-            this.підключенняToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.підключенняToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
             this.підключенняToolStripMenuItem.Text = "Підключення";
             this.підключенняToolStripMenuItem.Click += new System.EventHandler(this.підключенняToolStripMenuItem_Click);
             // 
@@ -102,6 +102,7 @@
             this.button1.TabIndex = 4;
             this.button1.Text = "Відправить";
             this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // Form1
             // 
