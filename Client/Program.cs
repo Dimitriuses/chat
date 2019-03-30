@@ -24,7 +24,12 @@ namespace Client
                 //    Console.WriteLine($"ip addr - {item}");
                 //}
                 //Conection
-                var serverIP = new IPAddress(new byte[] { 10, 7, 180, 104 });
+                byte[] conect = new byte[4];
+                conect[0] = Convert.ToByte(Convert.ToInt32(Console.ReadLine()));
+                conect[1] = Convert.ToByte(Convert.ToInt32(Console.ReadLine()));
+                conect[2] = Convert.ToByte(Convert.ToInt32(Console.ReadLine()));
+                conect[3] = Convert.ToByte(Convert.ToInt32(Console.ReadLine()));
+                var serverIP = new IPAddress(conect);
                 //IPEndPoint RemotePort = new IPEndPoint(ip, 11000);
                 IPEndPoint RemotePort = new IPEndPoint(serverIP, 11000);
                 //Socet creation
