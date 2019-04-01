@@ -24,13 +24,21 @@ namespace Client___GUI
         {
             
             Login = textBoxLogin.Text;
-            byte IPx1 = Convert.ToByte(numericUpDown1.Value);
-            byte IPx2 = Convert.ToByte(numericUpDown2.Value);
-            byte IPx3 = Convert.ToByte(numericUpDown3.Value);
-            byte IPx4 = Convert.ToByte(numericUpDown4.Value);
+            byte[] IP = new byte[4];
+            IP[0] = Convert.ToByte(numericUpDown1.Value);
+            IP[1] = Convert.ToByte(numericUpDown2.Value);
+            IP[2] = Convert.ToByte(numericUpDown3.Value);
+            IP[3] = Convert.ToByte(numericUpDown4.Value);
+
             int Port = Convert.ToInt32(numericUpDownPort.Value);
-            var ServerIP = new IPAddress(new byte[] { IPx1, IPx2, IPx3, IPx4 });
+            var ServerIP = new IPAddress(IP);
             IP_Info = new IPEndPoint(ServerIP, Port);
+            
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

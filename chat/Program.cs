@@ -44,7 +44,14 @@ namespace chat
                         buffer = new byte[1024];
                         int receivedBytes = handler.Receive(buffer);
                         data += Encoding.ASCII.GetString(buffer, 0, receivedBytes);
-                        if (data.IndexOf("EOT")>-1)
+                        
+                        if (data.IndexOf("/Connected") > -1)
+                        {
+                            data += " " + handler.RemoteEndPoint;
+                            //handler.Send(buffer);
+                            break;
+                        }
+                        if (data.IndexOf("EOT") > -1)
                         {
                             break;
                         }
@@ -53,7 +60,7 @@ namespace chat
                         $" \nUseless data is :{data}");
                     //echo effect
                     byte[] msg = Encoding.ASCII.GetBytes(data);
-                    handler.Send(msg);
+                    //handler.Send(msg);
                     handler.Shutdown(SocketShutdown.Both);
                     handler.Close();
                 }
