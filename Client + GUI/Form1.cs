@@ -9,6 +9,8 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Runtime.Serialization;
+using Newtonsoft.Json;
 
 namespace Client___GUI
 {
@@ -69,7 +71,11 @@ namespace Client___GUI
             {
                 Lodin = dlg.Login;
                 IPServer = dlg.IP_Info;
-                SendMSG("/Connected");
+                ChatMessage message = new ChatMessage();
+                message.Login = Lodin;
+                message.Message = "/Connected";
+                string json = JsonConvert.SerializeObject(message);
+                SendMSG(json);
 
             }
             //UpdateConnectionStatus();
@@ -77,7 +83,18 @@ namespace Client___GUI
 
         private void button1_Click(object sender, EventArgs e)
         {
+            if (textBox1.Text.Length > 0)
+            {
+                ChatMessage message = new ChatMessage();
+                message.Login = Lodin;
+                message.Message = textBox1.Text;
+                string json = JsonConvert.SerializeObject(message);
+                if (SendMSG(json))
+                {
 
+                }
+                //DataContractJsonSerializer jsonFormatter = new DataContractJsonSerializer(typeof(string[]));
+            }
         }
 
         private bool SendMSG(string message)
@@ -86,7 +103,7 @@ namespace Client___GUI
             try
             {
                 socket.Connect(IPServer);
-                byte[] msg = Encoding.ASCII.GetBytes(message + "EOT");
+                byte[] msg = Encoding.ASCII.GetBytes(message); //+ "EOT");
                 int sendBytes = socket.Send(msg);
                 //byte[] buffer = new byte[1024];
                 //int receivedBytes = socket.Receive(buffer);
@@ -98,7 +115,7 @@ namespace Client___GUI
             catch (Exception e)
             {
                 return false;
-                throw;
+                //throw;
             }
         }
 

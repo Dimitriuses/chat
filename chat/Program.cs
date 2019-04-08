@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Json.Net;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -6,6 +7,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace chat
 {
@@ -68,6 +70,7 @@ namespace chat
             }
             //Conection
             IPEndPoint localPort = new IPEndPoint(ip, 11000);
+            Console.WriteLine("Port: " + localPort.Port);
             //Socet creation
             Socket socket = new Socket(ip.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             try
@@ -82,21 +85,22 @@ namespace chat
                     Console.WriteLine("Waitting for connection/command...");
                     Socket handler = socket.Accept();
                     data = null;
-
+                    string ConOut = "";
                     //loop for data receiving
                     while (true)
                     {
                         buffer = new byte[1024];
                         int receivedBytes = handler.Receive(buffer);
                         data += Encoding.ASCII.GetString(buffer, 0, receivedBytes);
-                        
-                        if (data.IndexOf("/Connected") > -1)
+                        ChatMessage message = new ChatMessage();
+                        message = JsonConvert.DeserializeObject<ChatMessage>(data);
+                        if (message.Message.IndexOf("/Connected") > -1)
                         {
-                            data = handler.RemoteEndPoint + ": " + data;
+                            Console.WriteLine( handler.RemoteEndPoint +" " + message.Login + ": Conected");
                             //handler.Send(buffer);
                             break;
                         }
-                        if (data.IndexOf("EOT") > -1)
+                        if (message.Message.IndexOf("EOT") > -1)
                         {
 
                             break;
@@ -105,7 +109,7 @@ namespace chat
                     //Console.WriteLine($"Received: {data.Length} bytes" +
                     //    $" \nUseless data is :{data}");
                     //echo effect
-                    byte[] msg = Encoding.ASCII.GetBytes(data);
+                    //byte[] msg = Encoding.ASCII.GetBytes(data);
                     //handler.Send(msg);
                     handler.Shutdown(SocketShutdown.Both);
                     handler.Close();
