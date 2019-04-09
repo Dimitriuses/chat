@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
+using System.Threading;
 
 namespace Client___GUI
 {
@@ -18,6 +19,7 @@ namespace Client___GUI
     {
         public string Lodin { get; set; }
         public IPEndPoint IPServer;
+        Thread server;
 
         public string[] Status = { "None Conection", "Disconected", "Connected" };
 
@@ -31,12 +33,12 @@ namespace Client___GUI
         public Form1()
         {
             InitializeComponent();
-            
+            server = new Thread(Server);
         }
 
         private void UpdateConnectionStatus()
         {
-            if(IPServer == null)
+            if (IPServer == null)
             {
                 statusStrip1.Items[0].ForeColor = Color.Gray;
                 statusStrip1.Items[0].Text = Status[0];
@@ -67,7 +69,7 @@ namespace Client___GUI
         private void підключенняToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Connect dlg = new Connect();
-            if(dlg.ShowDialog() == DialogResult.OK)
+            if (dlg.ShowDialog() == DialogResult.OK)
             {
                 Lodin = dlg.Login;
                 IPServer = dlg.IP_Info;
@@ -76,7 +78,7 @@ namespace Client___GUI
                 message.Message = "/Connected";
                 string json = JsonConvert.SerializeObject(message);
                 SendMSG(json);
-
+                
             }
             //UpdateConnectionStatus();
         }
@@ -87,7 +89,7 @@ namespace Client___GUI
             {
                 ChatMessage message = new ChatMessage();
                 message.Login = Lodin;
-                message.Message = textBox1.Text;
+                message.Message = textBox1.Text + "EOT";
                 string json = JsonConvert.SerializeObject(message);
                 if (SendMSG(json))
                 {
@@ -122,6 +124,77 @@ namespace Client___GUI
         private void timer1_Tick(object sender, EventArgs e)
         {
             UpdateConnectionStatus();
+        }
+
+        public void Server()
+        {
+            string data = null;
+            byte[] buffer = new byte[1024];
+            IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
+            IPAddress ip = ipHostInfo.AddressList[1]; //moge ne 0
+
+            //foreach (var item in ipHostInfo.AddressList)
+            //{
+            //    Console.WriteLine($"ip addr - {item}");
+            //}
+            //Conection
+            IPEndPoint localPort = new IPEndPoint(ip, 12000);
+            //Console.WriteLine("Port: " + localPort.Port);
+            //Socet creation
+            Socket socket = new Socket(ip.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            try
+            {
+                socket.Bind(localPort);
+                socket.Listen(100);
+                //Console.ReadKey();
+
+                //loop for connection acceptance
+                while (true)
+                {
+                    //Console.WriteLine("Waitting for connection/command...");
+                    Socket handler = socket.Accept();
+                    data = null;
+                    string ConOut = "";
+                    //loop for data receiving
+                    while (true)
+                    {
+                        buffer = new byte[1024];
+                        int receivedBytes = handler.Receive(buffer);
+                        data += Encoding.ASCII.GetString(buffer, 0, receivedBytes);
+                        ChatMessage message = new ChatMessage();
+                        message = JsonConvert.DeserializeObject<ChatMessage>(data);
+                        //if (message.Message.IndexOf("/Connected") > -1)
+                        //{
+                        //    //Console.WriteLine(handler.RemoteEndPoint + " " + message.Login + ": Conected");
+                        //    //handler.Send(buffer);
+                        //    break;
+                        //}
+                        if (message.Message.IndexOf("EOT") > -1)
+                        {
+
+                            NewMess(message.Message.Replace("EOT",string.Empty));
+                            break;
+                        }
+                    }
+                    //Console.WriteLine($"Received: {data.Length} bytes" +
+                    //    $" \nUseless data is :{data}");
+                    //echo effect
+                    //byte[] msg = Encoding.ASCII.GetBytes(data);
+                    //handler.Send(msg);
+                    handler.Shutdown(SocketShutdown.Both);
+                    handler.Close();
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                throw;
+            }
+        }
+
+        private void NewMess(string message)
+        {
+            richTextBox1.Lines[richTextBox1.Lines.Length] = message;
         }
     }
 }
